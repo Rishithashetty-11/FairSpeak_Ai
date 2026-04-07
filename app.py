@@ -3,12 +3,18 @@ from flask_cors import CORS
 from nltk.sentiment import SentimentIntensityAnalyzer
 
 app = Flask(__name__)
-CORS(app)   
+CORS(app)
+
 sia = SentimentIntensityAnalyzer()
+
 @app.route('/predict', methods=['POST'])
 def predict():
     try:
-        text = request.json['text']
+        data = request.get_json()
+        text = data.get('text', '')
+
+        if not text.strip():
+            return jsonify({"label": "neutral", "score": 0.0})
 
         score = sia.polarity_scores(text)
         compound = score['compound']
@@ -26,6 +32,7 @@ def predict():
         })
 
     except Exception as e:
+        print("Error:", str(e))
         return jsonify({
             "label": "neutral",
             "score": 0.0,
@@ -33,4 +40,4 @@ def predict():
         })
 
 if __name__ == "__main__":
-    app.run(port=5000)
+    app.run(debug=True, port=5000)
