@@ -1,5 +1,26 @@
 console.log("FairSpeakAI loaded");
 
+// 🔥 INDIA FILTER (NEW)
+const indiaKeywords = [
+    "india", "indian", "modi", "delhi", "mumbai",
+    "bangalore", "hyderabad", "chennai", "kolkata"
+];
+
+const indiaHashtags = [
+    "#india", "#modi", "#indiapolitics",
+    "#indiafirst", "#bharat", "#indianarmy", "#indiavspak"
+];
+
+function isIndiaRelated(text) {
+    text = text.toLowerCase();
+
+    const keywordMatch = indiaKeywords.some(k => text.includes(k));
+    const hashtagMatch = indiaHashtags.some(h => text.includes(h));
+
+    return keywordMatch || hashtagMatch;
+}
+
+
 // Track processed tweets
 const processedTweets = new WeakSet();
 
@@ -9,7 +30,7 @@ let positive = 0;
 let neutral = 0;
 let negative = 0;
 
-// 🚀 Create dashboard UI (IMPROVED)
+// 🚀 Dashboard UI
 const dashboard = document.createElement("div");
 dashboard.style.position = "fixed";
 dashboard.style.top = "10px";
@@ -21,7 +42,7 @@ dashboard.style.borderRadius = "12px";
 dashboard.style.zIndex = "9999";
 dashboard.style.fontSize = "14px";
 dashboard.style.boxShadow = "0 0 10px rgba(0,0,0,0.5)";
-dashboard.innerHTML = "🔥 FairSpeakAI Loading...";
+dashboard.innerHTML = "🌍 FairSpeak AI (India Mode)...";
 document.body.appendChild(dashboard);
 
 // 🔄 Update dashboard
@@ -31,15 +52,15 @@ function updateDashboard() {
     const neu = total ? ((neutral / total) * 100).toFixed(1) : 0;
 
     dashboard.innerHTML = `
-    <b>🔥 FairSpeak AI</b><br>
+    <b>🌍 India Sentiment</b><br>
     Total: ${total} <br>
-    🔴 Toxic: ${n}% <br>
+    🔴 Negative: ${n}% <br>
     🟡 Neutral: ${neu}% <br>
     🟢 Positive: ${p}%
     `;
 }
 
-// 🧠 API CALL (WITH DELAY CONTROL)
+// 🧠 Queue system
 let queue = [];
 let isProcessing = false;
 
@@ -51,7 +72,7 @@ function processQueue() {
 
     analyzeTweet(element, text).finally(() => {
         isProcessing = false;
-        setTimeout(processQueue, 300); // 🔥 control API speed
+        setTimeout(processQueue, 300);
     });
 }
 
@@ -118,11 +139,15 @@ function processTweets() {
         if (!tweetElement) return;
 
         if (processedTweets.has(tweetElement)) return;
-        processedTweets.add(tweetElement);
 
         const text = tweet.innerText;
 
-        // 🔥 Add to queue instead of direct call
+        // 🔥 INDIA FILTER (MAIN LOGIC)
+        if (!isIndiaRelated(text)) return;
+
+        processedTweets.add(tweetElement);
+
+        // Add to queue
         queue.push({ element: tweet, text });
     });
 
@@ -132,17 +157,15 @@ function processTweets() {
 // 🚀 Initial run
 processTweets();
 
-// ⏱️ Interval reduced (less lag)
+// ⏱️ Interval
 setInterval(processTweets, 3000);
 
-// 👀 Smart MutationObserver (optimized)
+// 👀 MutationObserver
 const observer = new MutationObserver((mutations) => {
     let added = false;
 
     mutations.forEach(m => {
-        if (m.addedNodes.length > 0) {
-            added = true;
-        }
+        if (m.addedNodes.length > 0) added = true;
     });
 
     if (added) processTweets();
