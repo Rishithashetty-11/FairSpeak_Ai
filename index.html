@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>FairSpeak AI Dashboard 🇮🇳</title>
+</head>
+
+<body style="text-align:center; font-family:Arial; background:#111; color:white;">
+
+<h1>🔥 FairSpeak AI - India Sentiment 🇮🇳</h1>
+
+<img id="graph" src="http://127.0.0.1:5000/static/graph.png"
+     width="500" style="border-radius:10px; min-height:300px;">
+
+<div id="stats"></div>
+<p id="status">Loading...</p>
+
+<script>
+let lastLength = 0;
+
+async function checkUpdate() {
+    const res = await fetch("http://127.0.0.1:5000/data");
+    const data = await res.json();
+
+    let pos=0, neg=0, neu=0;
+    data.forEach(d=>{
+        if(d.sentiment==="positive") pos++;
+        else if(d.sentiment==="negative") neg++;
+        else neu++;
+    });
+
+    document.getElementById("stats").innerHTML =
+        `🟢 ${pos} | 🔴 ${neg} | 🟡 ${neu}`;
+
+    // 🔥 ONLY reload if data changed
+    if(data.length !== lastLength){
+        lastLength = data.length;
+
+        document.getElementById("graph").src =
+            "http://127.0.0.1:5000/static/graph.png?" + Date.now();
+    }
+
+    document.getElementById("status").innerText =
+        "Updated: " + new Date().toLocaleTimeString();
+}
+
+setInterval(checkUpdate, 3000);
+window.onload = checkUpdate;
+</script>
+
+</body>
+</html>
